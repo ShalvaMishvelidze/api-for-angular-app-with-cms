@@ -1,5 +1,6 @@
 import * as jose from "jose";
 import * as bcrypt from "bcrypt";
+import { TokenUser } from "@/interfaces/TokenUser";
 
 export const createJWT = async (user: {
   id: string;
@@ -11,19 +12,19 @@ export const createJWT = async (user: {
     ...user,
   })
     .setProtectedHeader({
-      alg: process.env.JWT_ALGORITHM as string,
+      alg: process.env.JWT_ALGORITHM || "HS256",
     })
     .setIssuedAt()
     .setIssuer("urn:example:issuer")
     .setAudience("urn:example:audience")
-    .setExpirationTime(process.env.JWT_EXPIRATION_TIME as string)
+    .setExpirationTime(process.env.JWT_EXPIRATION_TIME || "1h")
     .sign(new TextEncoder().encode(process.env.JWT_SECRET));
 
   return jwt;
 };
 
-export const validateJWT = async (token: string) => {
-  const { payload } = await jose.jwtVerify(
+export const validateJWT = async (token: string): Promise<TokenUser> => {
+  const { payload }: { payload: TokenUser } = await jose.jwtVerify(
     token,
     new TextEncoder().encode(process.env.JWT_SECRET),
     {

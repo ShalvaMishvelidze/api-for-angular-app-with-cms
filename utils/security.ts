@@ -4,6 +4,7 @@ import * as bcrypt from "bcrypt";
 export const createJWT = async (user: {
   id: string;
   name: string;
+  lastName: string;
   email: string;
 }): Promise<string> => {
   const jwt = await new jose.SignJWT({

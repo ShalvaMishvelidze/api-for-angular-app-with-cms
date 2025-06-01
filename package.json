@@ -11,7 +11,8 @@
     "@prisma/client": "^6.8.2",
     "bcrypt": "^6.0.0",
     "jose": "^6.0.11",
-    "next": "15.3.3"
+    "next": "15.3.3",
+    "zod": "^3.25.46"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

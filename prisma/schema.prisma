@@ -7,3 +7,69 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+enum UserRole {
+  user
+  seller
+  admin
+}
+
+enum UserStatus {
+  verified
+  unverified
+  suspended
+  deleted
+}
+
+enum ProductStatus {
+  active
+  inactive
+  suspended
+  deleted
+}
+
+model User {
+  id        String      @id @default(cuid())
+  email     String      @unique
+  password  String
+  role      UserRole   @default(user)
+  status    UserStatus @default(unverified)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  products  Product[]
+  orders   Order[]
+}
+
+model Product {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  quantity   Int
+  status      ProductStatus @default(active)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  userId      String
+  user        User          @relation(fields: [userId], references: [id])
+  orders      Order[]
+
+  @@index([userId])
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String
+  productId   String
+  quantity    Int
+  totalPrice  Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
+  product     Product  @relation(fields: [productId], references: [id])
+
+  @@index([userId])
+  @@index([productId])
+}

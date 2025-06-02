@@ -37,7 +37,22 @@ export async function POST(req: NextRequest) {
       email: user.email,
     });
 
-    return NextResponse.json({ token, user }, { status: 200 });
+    return NextResponse.json(
+      {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     if (error instanceof ZodError) {
       return NextResponse.json(

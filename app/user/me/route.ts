@@ -26,7 +26,25 @@ export async function GET(req: NextRequest) {
       where: { id: validToken.id },
     });
 
-    return NextResponse.json(tokenUser, { status: 200 });
+    if (!tokenUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      {
+        user: {
+          id: tokenUser.id,
+          name: tokenUser.name,
+          lastName: tokenUser.lastName,
+          email: tokenUser.email,
+          role: tokenUser.role,
+          status: tokenUser.status,
+          createdAt: tokenUser.createdAt,
+          updatedAt: tokenUser.updatedAt,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -66,7 +84,25 @@ export async function PATCH(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(tokenUser, { status: 200 });
+    if (!tokenUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      {
+        user: {
+          id: tokenUser.id,
+          name: tokenUser.name,
+          lastName: tokenUser.lastName,
+          email: tokenUser.email,
+          role: tokenUser.role,
+          status: tokenUser.status,
+          createdAt: tokenUser.createdAt,
+          updatedAt: tokenUser.updatedAt,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(

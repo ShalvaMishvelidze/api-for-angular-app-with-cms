@@ -20,7 +20,25 @@ export async function GET(
       where: { id },
     });
 
-    return NextResponse.json(user, { status: 200 });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      {
+        user: {
+          id: user.id,
+          name: user.name,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -54,7 +72,25 @@ export async function PATCH(
       },
     });
 
-    return NextResponse.json(user, { status: 200 });
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(
+      {
+        user: {
+          id: user.id,
+          name: user.name,
+          lastName: user.lastName,
+          email: user.email,
+          role: user.role,
+          status: user.status,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(

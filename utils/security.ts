@@ -2,6 +2,22 @@ import * as jose from "jose";
 import * as bcrypt from "bcrypt";
 import { TokenUser } from "@/interfaces/TokenUser";
 
+export const createEmailToken = async ({
+  email,
+  purpose,
+}: {
+  email: string;
+  purpose: string;
+}): Promise<string> => {
+  const jwt = await new jose.SignJWT({ email, purpose })
+    .setProtectedHeader({
+      alg: process.env.EMAIL_TOKEN_ALGORITHM || "HS256",
+    })
+    .setExpirationTime(process.env.EMAIL_TOKEN_EXPIRATION_TIME || "15m")
+    .sign(new TextEncoder().encode(process.env.EMAIL_TOKEN_SECRET));
+  return jwt;
+};
+
 export const createJWT = async (user: {
   id: string;
   name: string;

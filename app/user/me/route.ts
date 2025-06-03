@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     if (!validToken) {
       return NextResponse.json(
-        { error: "Invalid or expired token" },
+        { error: "Invalid or expired token", code: "er1001" },
         { status: 401 }
       );
     }
@@ -70,7 +70,7 @@ export async function PATCH(req: NextRequest) {
 
     if (!validToken) {
       return NextResponse.json(
-        { error: "Invalid or expired token" },
+        { error: "Invalid or expired token", code: "er1001" },
         { status: 401 }
       );
     }
@@ -127,7 +127,7 @@ export async function DELETE(req: NextRequest) {
 
     if (!validToken) {
       return NextResponse.json(
-        { error: "Invalid or expired token" },
+        { error: "Invalid or expired token", code: "er1001" },
         { status: 401 }
       );
     }

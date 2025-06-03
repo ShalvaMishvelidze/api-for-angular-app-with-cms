@@ -18,6 +18,16 @@ export const createEmailToken = async ({
   return jwt;
 };
 
+export const validateEmailToken = async (
+  token: string
+): Promise<{ email: string }> => {
+  const { payload }: { payload: TokenUser } = await jose.jwtVerify(
+    token,
+    new TextEncoder().encode(process.env.EMAIL_TOKEN_SECRET)
+  );
+  return payload;
+};
+
 export const createJWT = async (user: {
   id: string;
   name: string;

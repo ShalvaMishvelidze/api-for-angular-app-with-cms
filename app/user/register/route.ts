@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { sendEmail } from "@/lib/sendEmail";
-import { createEmailToken, createJWT, hashPassword } from "@/utils/security";
+import { createJWT, hashPassword } from "@/utils/security";
 import { registerSchema } from "@/utils/validators/register";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
@@ -39,22 +38,6 @@ export async function POST(req: NextRequest) {
       name: user.name,
       lastName: user.lastName,
       email: user.email,
-    });
-
-    const emailToken = await createEmailToken({
-      email: user.email,
-      purpose: "verify-email",
-    });
-
-    const link = `${process.env.BASE_URL}/user/verify-email?token=${emailToken}`;
-
-    await sendEmail({
-      to: user.email,
-      subject: "Verify your email",
-      html: `<p>Hi ${user.name},</p>
-             <p>Thank you for registering. Please verify your email by clicking the link below:</p>
-             <a href="${link}">Verify Email</a>
-             <p>If you did not register, please ignore this email.</p>`,
     });
 
     return NextResponse.json(

@@ -48,6 +48,18 @@ export async function GET(req: NextRequest) {
     };
 
     const products = await prisma.product.findMany({
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        category: true,
+        thumbnail: true,
+        images: true,
+        discount: true,
+        stock: true,
+        rating: true,
+      },
       where: filter,
       orderBy: sort ? { [sort]: order } : undefined,
       skip: (page - 1) * PAGE_SIZE,
@@ -57,9 +69,16 @@ export async function GET(req: NextRequest) {
     const totalCount = await prisma.product.count({ where: filter });
     const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
+    const formattedProducts = products.map((product) => {
+      return {
+        ...product,
+        images: JSON.parse(product.images || "[]"),
+      };
+    });
+
     return NextResponse.json({
-      products,
-      totalPages,
+      products: formattedProducts,
+      pages: totalPages,
       categories,
     });
   } catch (error) {

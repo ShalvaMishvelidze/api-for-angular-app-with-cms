@@ -40,10 +40,16 @@ export async function GET(req: NextRequest) {
 
     const filter: any = {
       ...(search && {
-        name: { contains: search, mode: "insensitive" },
+        name: {
+          contains: search,
+          // mode: "insensitive" for postgres in future
+        },
       }),
       ...(category !== "all" && {
-        category: { equals: category, mode: "insensitive" },
+        category: {
+          equals: category,
+          //  mode: "insensitive" for postgres in future
+        },
       }),
     };
 

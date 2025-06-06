@@ -23,7 +23,10 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(product, { status: 200 });
+    return NextResponse.json(
+      { ...product, images: JSON.parse(product?.images || "[]") },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
     return NextResponse.json(

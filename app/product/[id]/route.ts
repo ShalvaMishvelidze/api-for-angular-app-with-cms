@@ -9,6 +9,18 @@ export async function GET(
     const { id } = await params;
     const product = await prisma.product.findUnique({
       where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        price: true,
+        category: true,
+        thumbnail: true,
+        images: true,
+        discount: true,
+        stock: true,
+        rating: true,
+      },
     });
 
     return NextResponse.json(product, { status: 200 });

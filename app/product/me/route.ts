@@ -24,18 +24,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const tokenUserProducts = await prisma.product.findMany({
+      where: { userId: validToken.id },
+    });
+
     return NextResponse.json(
       {
-        user: {
-          id: tokenUser.id,
-          name: tokenUser.name,
-          lastName: tokenUser.lastName,
-          email: tokenUser.email,
-          role: tokenUser.role,
-          status: tokenUser.status,
-          createdAt: tokenUser.createdAt,
-          updatedAt: tokenUser.updatedAt,
-        },
+        products: tokenUserProducts,
       },
       { status: 200 }
     );
@@ -57,7 +52,18 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try {
     const token = req.headers.get("Authorization")?.split(" ")[1];
-    const { name, lastName, email } = await req.json();
+    const {
+      id,
+      name,
+      thumbnail,
+      images,
+      description,
+      discount,
+      price,
+      stock,
+      category,
+      status,
+    } = await req.json();
 
     if (!token) {
       return NextResponse.json(
@@ -68,31 +74,32 @@ export async function PATCH(req: NextRequest) {
 
     const validToken = await validateJWT(token);
 
-    const tokenUser = await prisma.user.update({
+    const tokenUser = await prisma.user.findUnique({
       where: { id: validToken.id },
-      data: {
-        name,
-        lastName,
-        email,
-      },
     });
 
     if (!tokenUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    const tokenUserProduct = await prisma.product.update({
+      where: { id, userId: validToken.id },
+      data: {
+        name,
+        thumbnail,
+        images,
+        description,
+        discount,
+        price,
+        stock,
+        category,
+        status,
+      },
+    });
+
     return NextResponse.json(
       {
-        user: {
-          id: tokenUser.id,
-          name: tokenUser.name,
-          lastName: tokenUser.lastName,
-          email: tokenUser.email,
-          role: tokenUser.role,
-          status: tokenUser.status,
-          createdAt: tokenUser.createdAt,
-          updatedAt: tokenUser.updatedAt,
-        },
+        product: tokenUserProduct,
       },
       { status: 200 }
     );
@@ -115,6 +122,7 @@ export async function PATCH(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   try {
     const token = req.headers.get("Authorization")?.split(" ")[1];
+    const body = await req.json();
 
     if (!token) {
       return NextResponse.json(
@@ -125,8 +133,16 @@ export async function DELETE(req: NextRequest) {
 
     const validToken = await validateJWT(token);
 
-    await prisma.user.delete({
+    const tokenUser = await prisma.user.findUnique({
       where: { id: validToken.id },
+    });
+
+    if (!tokenUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    await prisma.product.delete({
+      where: { id: body.productId, userId: validToken.id },
     });
 
     return new NextResponse(null, {

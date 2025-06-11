@@ -5,6 +5,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = req.nextUrl;
+    const rawSearch = searchParams.get("search")?.trim() || "";
+    const search = rawSearch.length > 100 ? rawSearch.slice(0, 100) : rawSearch;
+
     const token = req.headers.get("Authorization")?.split(" ")[1];
 
     if (!token) {
@@ -25,7 +29,7 @@ export async function GET(req: NextRequest) {
     }
 
     const tokenUserProducts = await prisma.product.findMany({
-      where: { userId: validToken.id },
+      where: { userId: validToken.id, name: { contains: search } },
     });
 
     return NextResponse.json(
@@ -41,6 +45,19 @@ export async function GET(req: NextRequest) {
         { status: 401 }
       );
     }
+    console.error(error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    // Your logic here
+    return NextResponse.json({ message: "Success" }, { status: 200 });
+  } catch (error) {
     console.error(error);
     return NextResponse.json(
       { error: "Something went wrong" },

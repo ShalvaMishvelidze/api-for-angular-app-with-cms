@@ -24,7 +24,13 @@ export async function GET(
     });
 
     return NextResponse.json(
-      { ...product, images: JSON.parse(product?.images || "[]") },
+      {
+        ...product,
+        thumbnail: JSON.parse(
+          product?.thumbnail || '{"url": null, "id": null}'
+        ),
+        images: JSON.parse(product?.images || "[]"),
+      },
       { status: 200 }
     );
   } catch (error) {

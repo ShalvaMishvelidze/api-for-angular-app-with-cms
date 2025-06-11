@@ -32,9 +32,17 @@ export async function GET(req: NextRequest) {
       where: { userId: validToken.id, name: { contains: search } },
     });
 
+    const formattedProducts = tokenUserProducts.map((product) => {
+      return {
+        ...product,
+        thumbnail: JSON.parse(product.thumbnail || "{url: null, id: null}"),
+        images: JSON.parse(product.images || "[]"),
+      };
+    });
+
     return NextResponse.json(
       {
-        products: tokenUserProducts,
+        products: formattedProducts,
       },
       { status: 200 }
     );

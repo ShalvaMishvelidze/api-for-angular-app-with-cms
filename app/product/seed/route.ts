@@ -12,8 +12,16 @@ export async function GET() {
       await prisma.product.create({
         data: {
           name: product.title,
-          thumbnail: product.thumbnail,
-          images: JSON.stringify(product.images),
+          thumbnail: JSON.stringify({
+            url: product.thumbnail,
+            id: Math.random().toString(36).substring(2, 15),
+          }),
+          images: JSON.stringify(
+            product.images.map((image: string) => ({
+              url: image,
+              id: Math.random().toString(36).substring(2, 15),
+            }))
+          ),
           description: product.description,
           discount: Math.round(product.discountPercentage) || 0,
           price: product.price,

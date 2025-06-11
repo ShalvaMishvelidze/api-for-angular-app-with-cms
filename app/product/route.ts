@@ -78,6 +78,7 @@ export async function GET(req: NextRequest) {
     const formattedProducts = products.map((product) => {
       return {
         ...product,
+        thumbnail: JSON.parse(product.thumbnail || "{url: null, id: null}"),
         images: JSON.parse(product.images || "[]"),
       };
     });

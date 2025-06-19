@@ -38,7 +38,7 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/cloudinary/*",
+        source: "/cloudinary/(.*)",
         headers: [
           {
             key: "Access-Control-Allow-Origin",

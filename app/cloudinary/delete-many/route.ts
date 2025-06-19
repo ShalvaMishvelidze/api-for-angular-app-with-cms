@@ -10,8 +10,7 @@ cloudinary.config({
 export async function DELETE(req: NextRequest) {
   try {
     // User validation can be added here in the future
-    const body = await req.json();
-    const publicIds = body.publicIds ?? (body.publicId ? [body.publicId] : []);
+    const publicIds = await req.json();
 
     await cloudinary.api.delete_resources(publicIds, {
       invalidate: true,

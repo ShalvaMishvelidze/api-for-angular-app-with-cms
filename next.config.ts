@@ -21,6 +21,23 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/product/create",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "http://next.myapp.local",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,POST,OPTIONS,PUT,DELETE",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+        ],
+      },
+      {
         source: "/product/generate-description",
         headers: [
           {

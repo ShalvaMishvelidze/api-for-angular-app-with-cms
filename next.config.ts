@@ -38,6 +38,23 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/cloudinary/*",
+        headers: [
+          {
+            key: "Access-Control-Allow-Origin",
+            value: "http://next.myapp.local",
+          },
+          {
+            key: "Access-Control-Allow-Methods",
+            value: "GET,POST,OPTIONS,PUT,DELETE",
+          },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Content-Type, Authorization",
+          },
+        ],
+      },
+      {
         source: "/(.*)",
         headers: [
           {

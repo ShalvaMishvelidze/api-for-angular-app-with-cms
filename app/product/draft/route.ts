@@ -19,13 +19,24 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       {
-        draft: {
-          ...draft,
-          thumbnail: JSON.parse(
-            draft?.thumbnail || '{"url": null, "id": null}'
-          ),
-          images: JSON.parse(draft?.images || "[]"),
-        },
+        draft: draft
+          ? {
+              ...draft,
+              thumbnail: JSON.parse(
+                draft?.thumbnail || '{"url": null, "id": null}'
+              ),
+              images: JSON.parse(draft?.images || "[]"),
+            }
+          : {
+              name: "",
+              description: "",
+              price: 0,
+              category: "",
+              discount: 0,
+              stock: 0,
+              thumbnail: { url: null, id: null },
+              images: [],
+            },
       },
       { status: 200 }
     );

@@ -1,10 +1,10 @@
 import { prisma } from "@/lib/prisma";
-import { validateJWT } from "@/utils/security";
 import { productSchema } from "@/utils/validators/product";
 import { JOSEError } from "jose/errors";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 import OpenAI from "openai";
+import { validateToken } from "@/utils/tokenValidator";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -12,16 +12,8 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authorization token is required" },
-        { status: 401 }
-      );
-    }
-
-    const validToken = await validateJWT(token);
+    const validToken = await validateToken(req);
+    console.log(validToken);
 
     const tokenUser = await prisma.user.findUnique({
       where: { id: validToken.id },
@@ -84,10 +76,6 @@ export async function POST(req: NextRequest) {
       data: {
         ...data,
       },
-    });
-
-    await prisma.productDraft.delete({
-      where: { userId: tokenUser.id },
     });
 
     return NextResponse.json(

@@ -1,3 +1,5 @@
+import { defaultError } from "@/utils/defaultError";
+import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
@@ -7,6 +9,7 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   try {
+    await validateToken(req);
     const { name } = await req.json();
     if (!name || typeof name !== "string" || name.trim() === "") {
       return NextResponse.json(
@@ -25,11 +28,7 @@ export async function POST(req: NextRequest) {
 
     const description = response.choices[0].message.content;
     return NextResponse.json({ description }, { status: 200 });
-  } catch (err: any) {
-    console.error("OpenAI error:", err);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+  } catch (error) {
+    return defaultError(error);
   }
 }

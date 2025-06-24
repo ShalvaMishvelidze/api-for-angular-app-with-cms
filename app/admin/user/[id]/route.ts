@@ -1,20 +1,27 @@
 import { prisma } from "@/lib/prisma";
+import { defaultError } from "@/utils/defaultError";
+import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
-import { validate } from "./validate";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const token = req.headers.get("Authorization")?.split(" ")[1];
+    const validToken = await validateToken(req);
+    const tokenUser = await prisma.user.findUnique({
+      where: { id: validToken.id },
+      select: { role: true },
+    });
 
-    const validationResult = await validate(token, id);
-
-    if (validationResult) {
-      return validationResult;
+    if (tokenUser?.role !== "admin") {
+      return NextResponse.json(
+        { error: "You do not have permission to access this resource" },
+        { status: 403 }
+      );
     }
+
+    const { id } = await params;
 
     const user = await prisma.user.findUnique({
       where: { id },
@@ -40,11 +47,7 @@ export async function GET(
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }
 
@@ -53,15 +56,21 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-    const { name, lastName, email } = await req.json();
+    const validToken = await validateToken(req);
+    const tokenUser = await prisma.user.findUnique({
+      where: { id: validToken.id },
+      select: { role: true },
+    });
 
-    const validationResult = await validate(token, id);
-
-    if (validationResult) {
-      return validationResult;
+    if (tokenUser?.role !== "admin") {
+      return NextResponse.json(
+        { error: "You do not have permission to access this resource" },
+        { status: 403 }
+      );
     }
+
+    const { id } = await params;
+    const { name, lastName, email } = await req.json();
 
     const user = await prisma.user.update({
       where: { id },
@@ -92,11 +101,7 @@ export async function PATCH(
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }
 
@@ -105,14 +110,20 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
-    const token = req.headers.get("Authorization")?.split(" ")[1];
+    const validToken = await validateToken(req);
+    const tokenUser = await prisma.user.findUnique({
+      where: { id: validToken.id },
+      select: { role: true },
+    });
 
-    const validationResult = await validate(token, id);
-
-    if (validationResult) {
-      return validationResult;
+    if (tokenUser?.role !== "admin") {
+      return NextResponse.json(
+        { error: "You do not have permission to access this resource" },
+        { status: 403 }
+      );
     }
+
+    const { id } = await params;
 
     await prisma.user.delete({
       where: { id },
@@ -122,10 +133,6 @@ export async function DELETE(
       status: 204,
     });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

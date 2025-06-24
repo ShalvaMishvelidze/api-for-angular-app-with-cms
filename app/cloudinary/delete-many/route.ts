@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
+import { validateToken } from "@/utils/tokenValidator";
+import { defaultError } from "@/utils/defaultError";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME!,
@@ -9,7 +11,7 @@ cloudinary.config({
 
 export async function DELETE(req: NextRequest) {
   try {
-    // User validation can be added here in the future
+    await validateToken(req);
     const publicIds = await req.json();
 
     await cloudinary.api.delete_resources(publicIds, {
@@ -19,9 +21,6 @@ export async function DELETE(req: NextRequest) {
     return new NextResponse(null, { status: 204 });
   } catch (error: any) {
     console.error("Failed to delete image(s):", error);
-    return NextResponse.json(
-      { error: "Failed to delete image(s)", details: error.message },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

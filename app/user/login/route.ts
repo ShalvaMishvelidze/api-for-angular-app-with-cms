@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { defaultError } from "@/utils/defaultError";
 import { comparePassword, createJWT } from "@/utils/security";
 import { loginSchema } from "@/utils/validators/login";
 import { NextRequest, NextResponse } from "next/server";
@@ -54,16 +55,6 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        { error: error.errors.map((err) => err.message) },
-        { status: 400 }
-      );
-    }
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

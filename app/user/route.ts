@@ -1,19 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { validateJWT } from "@/utils/security";
+import { defaultError } from "@/utils/defaultError";
+import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authorization token is missing" },
-        { status: 401 }
-      );
-    }
-
-    const validToken = await validateJWT(token);
+    const validToken = await validateToken(req);
 
     if (!validToken) {
       return NextResponse.json(
@@ -38,10 +30,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(users, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

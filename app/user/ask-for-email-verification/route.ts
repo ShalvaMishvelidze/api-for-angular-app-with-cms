@@ -1,20 +1,12 @@
 import { sendEmail } from "@/lib/sendEmail";
-import { createEmailToken, validateJWT } from "@/utils/security";
-import { JOSEError } from "jose/errors";
+import { defaultError } from "@/utils/defaultError";
+import { createEmailToken } from "@/utils/security";
+import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authorization token is required" },
-        { status: 401 }
-      );
-    }
-
-    const validToken = await validateJWT(token);
+    const validToken = await validateToken(req);
 
     const emailToken = await createEmailToken({
       email: validToken.email,
@@ -37,16 +29,6 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
-    if (error instanceof JOSEError) {
-      return NextResponse.json(
-        { error: "Expired or invalid token", code: "er1001" },
-        { status: 401 }
-      );
-    }
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

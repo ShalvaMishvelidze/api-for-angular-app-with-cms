@@ -1,20 +1,11 @@
 import { prisma } from "@/lib/prisma";
-import { validateJWT } from "@/utils/security";
-import { JOSEError } from "jose/errors";
+import { defaultError } from "@/utils/defaultError";
+import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authorization token is required" },
-        { status: 401 }
-      );
-    }
-
-    const validToken = await validateJWT(token);
+    const validToken = await validateToken(req);
 
     const tokenUser = await prisma.user.findUnique({
       where: { id: validToken.id },
@@ -40,33 +31,14 @@ export async function GET(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    if (error instanceof JOSEError) {
-      return NextResponse.json(
-        { error: "Expired or invalid token", code: "er1001" },
-        { status: 401 }
-      );
-    }
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }
 
 export async function PATCH(req: NextRequest) {
   try {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
+    const validToken = await validateToken(req);
     const { name, lastName, email } = await req.json();
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authorization token is required" },
-        { status: 401 }
-      );
-    }
-
-    const validToken = await validateJWT(token);
 
     const tokenUser = await prisma.user.update({
       where: { id: validToken.id },
@@ -97,33 +69,13 @@ export async function PATCH(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
-    if (error instanceof JOSEError) {
-      return NextResponse.json(
-        { error: "Expired or invalid token", code: "er1001" },
-        { status: 401 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-
-    if (!token) {
-      return NextResponse.json(
-        { error: "Authorization token is required" },
-        { status: 401 }
-      );
-    }
-
-    const validToken = await validateJWT(token);
+    const validToken = await validateToken(req);
 
     await prisma.user.delete({
       where: { id: validToken.id },
@@ -133,16 +85,6 @@ export async function DELETE(req: NextRequest) {
       status: 204,
     });
   } catch (error) {
-    if (error instanceof JOSEError) {
-      return NextResponse.json(
-        { error: "Expired or invalid token", code: "er1001" },
-        { status: 401 }
-      );
-    }
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

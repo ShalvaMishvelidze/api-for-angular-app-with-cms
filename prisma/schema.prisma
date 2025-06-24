@@ -41,6 +41,8 @@ model User {
 
   products  Product[]
   orders   Order[]
+  cartItem    Cart[]
+
   productDraft ProductDraft?
 }
 
@@ -61,6 +63,7 @@ model Product {
 
   userId      String
   user        User          @relation(fields: [userId], references: [id])
+  cartItem    Cart[]
   orders      Order[]
 
   @@index([userId])
@@ -84,6 +87,22 @@ model ProductDraft {
 
   @@index([userId])
 }
+
+model Cart {
+  id        String    @id @default(cuid())
+  userId    String
+  productId String
+  quantity  Int       @default(1)
+  addedAt   DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
+}
+
 
 model Order {
   id          String   @id @default(cuid())

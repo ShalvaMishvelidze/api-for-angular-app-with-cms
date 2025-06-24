@@ -1,10 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { productSchema } from "@/utils/validators/product";
-import { JOSEError } from "jose/errors";
 import { NextRequest, NextResponse } from "next/server";
-import { ZodError } from "zod";
 import OpenAI from "openai";
 import { validateToken } from "@/utils/tokenValidator";
+import { defaultError } from "@/utils/defaultError";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -13,7 +12,6 @@ const openai = new OpenAI({
 export async function POST(req: NextRequest) {
   try {
     const validToken = await validateToken(req);
-    console.log(validToken);
 
     const tokenUser = await prisma.user.findUnique({
       where: { id: validToken.id },
@@ -89,22 +87,6 @@ export async function POST(req: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error(error);
-    if (error instanceof JOSEError) {
-      return NextResponse.json(
-        { error: "Expired or invalid token", code: "er1001" },
-        { status: 401 }
-      );
-    }
-    if (error instanceof ZodError) {
-      return NextResponse.json(
-        { error: error.errors.map((err) => err.message) },
-        { status: 400 }
-      );
-    }
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

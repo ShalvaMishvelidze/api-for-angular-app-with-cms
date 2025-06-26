@@ -12,7 +12,10 @@ export async function GET(req: NextRequest) {
       where: {
         userId: validToken.id,
       },
-      include: {
+      select: {
+        id: true,
+        quantity: true,
+        productId: true,
         product: {
           select: {
             name: true,

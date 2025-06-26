@@ -1,13 +1,132 @@
+import { prisma } from "@/lib/prisma";
 import { defaultError } from "@/utils/defaultError";
 import { validateToken } from "@/utils/tokenValidator";
+import { cartSchema } from "@/utils/validators/cart";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
-    const validToken = validateToken(req);
-    return NextResponse.json({ message: "Success" }, { status: 200 });
+    const validToken = await validateToken(req);
+
+    const userCart = await prisma.cart.findMany({
+      where: {
+        userId: validToken.id,
+      },
+      include: {
+        product: {
+          select: {
+            thumbnail: true,
+            price: true,
+            stock: true,
+          },
+        },
+      },
+    });
+
+    const totalResult = await prisma.$queryRawUnsafe<
+      { totalQuantity: number; totalPrice: number }[]
+    >(
+      `
+        SELECT 
+          SUM(c.quantity) AS "totalQuantity",
+          SUM(c.quantity * p.price) AS "totalPrice"
+        FROM "Cart" c
+        JOIN "Product" p ON c."productId" = p.id
+        WHERE c."userId" = $1
+      `,
+      validToken.id
+    );
+
+    const { totalQuantity, totalPrice } = totalResult[0] || {
+      totalQuantity: 0,
+      totalPrice: 0,
+    };
+
+    return NextResponse.json(
+      {
+        cart: userCart,
+        total: totalQuantity,
+        totalPrice,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
+    return defaultError(error);
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const validToken = await validateToken(req);
+    const { productId, quantity } = await req.json();
+
+    const validProduct = cartSchema.parse({ quantity });
+
+    let parsedQuantity = validProduct.quantity;
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { stock: true },
+    });
+
+    if (!product) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    if (parsedQuantity > product.stock) {
+      parsedQuantity = product.stock;
+    }
+
+    const newCartItem = await prisma.cart.create({
+      data: {
+        userId: validToken.id,
+        productId,
+        quantity: validProduct.quantity,
+      },
+    });
+
+    return NextResponse.json({ product: newCartItem }, { status: 200 });
+  } catch (error) {
+    return defaultError(error);
+  }
+}
+
+export async function PATCH(req: NextRequest) {
+  try {
+    const validToken = await validateToken(req);
+    const { quantity, itemId } = await req.json();
+
+    const newCartItem = await prisma.cart.update({
+      where: {
+        id: itemId,
+        userId: validToken.id,
+      },
+      data: {
+        quantity,
+      },
+    });
+
+    return NextResponse.json({ product: newCartItem }, { status: 200 });
+  } catch (error) {
+    return defaultError(error);
+  }
+}
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const validToken = await validateToken(req);
+    const { itemId } = await req.json();
+
+    const newCartItem = await prisma.cart.delete({
+      where: {
+        id: itemId,
+        userId: validToken.id,
+      },
+    });
+
+    return NextResponse.json({ product: newCartItem }, { status: 200 });
+  } catch (error) {
     return defaultError(error);
   }
 }

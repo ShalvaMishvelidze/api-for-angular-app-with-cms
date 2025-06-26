@@ -13,7 +13,7 @@ export async function DELETE(req: NextRequest) {
       },
     });
 
-    return new NextResponse(null, { status: 200 });
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
     return defaultError(error);
   }

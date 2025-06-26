@@ -118,14 +118,14 @@ export async function DELETE(req: NextRequest) {
     const validToken = await validateToken(req);
     const { itemId } = await req.json();
 
-    const newCartItem = await prisma.cart.delete({
+    await prisma.cart.delete({
       where: {
         id: itemId,
         userId: validToken.id,
       },
     });
 
-    return NextResponse.json({ product: newCartItem }, { status: 200 });
+    return new NextResponse(null, { status: 200 });
   } catch (error) {
     return defaultError(error);
   }

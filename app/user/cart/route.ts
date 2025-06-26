@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
       include: {
         product: {
           select: {
+            name: true,
             thumbnail: true,
             price: true,
             stock: true,
@@ -45,8 +46,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         cart: userCart,
-        total: totalQuantity,
-        totalPrice,
+        total: Number(totalQuantity),
+        totalPrice: Number(totalPrice),
       },
       { status: 200 }
     );

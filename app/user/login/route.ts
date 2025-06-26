@@ -3,7 +3,6 @@ import { defaultError } from "@/utils/defaultError";
 import { comparePassword, createJWT } from "@/utils/security";
 import { loginSchema } from "@/utils/validators/login";
 import { NextRequest, NextResponse } from "next/server";
-import { ZodError } from "zod";
 
 export async function POST(req: NextRequest) {
   try {

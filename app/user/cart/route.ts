@@ -27,6 +27,18 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    const flatCart = userCart.map((item) => {
+      return {
+        id: item.id,
+        quantity: item.quantity,
+        productId: item.productId,
+        name: item.product.name,
+        thumbnail: JSON.parse(item.product.thumbnail),
+        price: item.product.price,
+        stock: item.product.stock,
+      };
+    });
+
     const totalResult = await prisma.$queryRawUnsafe<
       { totalQuantity: number; totalPrice: number }[]
     >(
@@ -48,7 +60,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       {
-        cart: userCart,
+        cart: flatCart,
         total: Number(totalQuantity),
         totalPrice: Number(totalPrice),
       },

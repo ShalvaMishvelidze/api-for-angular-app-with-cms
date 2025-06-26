@@ -78,11 +78,18 @@ export async function POST(req: NextRequest) {
       parsedQuantity = product.stock;
     }
 
-    const newCartItem = await prisma.cart.create({
-      data: {
+    const newCartItem = await prisma.cart.upsert({
+      where: {
+        userId_productId: {
+          userId: validToken.id,
+          productId,
+        },
+      },
+      update: {},
+      create: {
         userId: validToken.id,
         productId,
-        quantity: validProduct.quantity,
+        quantity: parsedQuantity,
       },
     });
 

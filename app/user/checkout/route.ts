@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       line_items: body.items.map((item: any) => ({
         price_data: {
           currency: "usd",
-          unit_amount: item.price * 100, // cents
+          unit_amount: Math.round(item.price * 100), // cents
           product_data: {
             name: item.name,
           },
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${process.env.STRIPE_CANCEL_URL}/cancel`,
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ id: session.id });
   } catch (error) {
     console.error(error);
     return NextResponse.json(

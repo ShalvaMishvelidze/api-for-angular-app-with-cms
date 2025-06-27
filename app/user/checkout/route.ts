@@ -1,3 +1,6 @@
+import { prisma } from "@/lib/prisma";
+import { defaultError } from "@/utils/defaultError";
+import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
@@ -6,9 +9,15 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-
   try {
+    const validToken = await validateToken(req);
+    const tokenUser = await prisma.user.findUnique({
+      where: { id: validToken.id },
+    });
+    if (!tokenUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    const body = await req.json();
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
@@ -28,10 +37,6 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ id: session.id });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Unable to create session" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { defaultError } from "@/utils/defaultError";
 import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -23,10 +24,6 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json({ orders }, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Something went wrong" },
-      { status: 500 }
-    );
+    return defaultError(error);
   }
 }

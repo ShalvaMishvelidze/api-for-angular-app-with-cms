@@ -4,9 +4,7 @@ import { validateToken } from "@/utils/tokenValidator";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-05-28.basil",
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,15 +22,21 @@ export async function POST(req: NextRequest) {
       line_items: body.items.map((item: any) => ({
         price_data: {
           currency: "usd",
-          unit_amount: Math.round(item.price * 100), // cents
+          unit_amount: Math.round(item.price * 100),
           product_data: {
             name: item.name,
+            metadata: {
+              productId: item.productId,
+            },
           },
         },
         quantity: item.quantity,
       })),
       success_url: `${process.env.STRIPE_SUCCESS_URL}/success`,
       cancel_url: `${process.env.STRIPE_CANCEL_URL}/cancel`,
+      metadata: {
+        userId: tokenUser.id,
+      },
     });
 
     return NextResponse.json({ id: session.id });

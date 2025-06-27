@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         productId: (item.price?.product as Stripe.Product)?.metadata
           ?.productId as string,
         quantity: item.quantity || 1,
-        price: (item.amount_total || 0) / 100,
+        price: (item.amount_total || 0) / (item.quantity || 1) / 100,
         amount: (item.amount_total || 0) / 100,
       }));
 

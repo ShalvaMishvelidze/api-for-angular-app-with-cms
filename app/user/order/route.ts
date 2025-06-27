@@ -34,10 +34,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    return NextResponse.json(
-      { orderItems: order?.orderItems },
-      { status: 200 }
-    );
+    return NextResponse.json({ orderItems: order }, { status: 200 });
   } catch (error) {
     return defaultError(error);
   }

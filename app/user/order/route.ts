@@ -24,11 +24,26 @@ export async function GET(req: NextRequest) {
     }
 
     const order = await prisma.order.findUnique({
-      where: { id: orderId, userId: tokenUser.id },
-      include: {
+      where: { id: orderId },
+      select: {
+        id: true,
+        total: true,
+        status: true,
+        createdAt: true,
         orderItems: {
-          include: {
-            product: true,
+          select: {
+            id: true,
+            quantity: true,
+            price: true,
+            amount: true,
+            product: {
+              select: {
+                id: true,
+                name: true,
+                price: true,
+                thumbnail: true,
+              },
+            },
           },
         },
       },

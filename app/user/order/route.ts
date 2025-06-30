@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     }
 
     const order = await prisma.order.findUnique({
-      where: { id: orderId },
+      where: { id: orderId, userId: tokenUser.id },
       select: {
         id: true,
         total: true,

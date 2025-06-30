@@ -20,11 +20,11 @@ export async function POST(req: NextRequest) {
     const { orderId } = await req.json();
 
     const order = await prisma.order.findUnique({
-      where: { id: orderId },
+      where: { id: orderId, userId: tokenUser.id },
       include: { user: true },
     });
 
-    if (!order || order.userId !== tokenUser.id) {
+    if (!order) {
       return NextResponse.json({ msg: "Not found" }, { status: 404 });
     }
 

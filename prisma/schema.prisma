@@ -35,6 +35,11 @@ enum OrderStatus {
   cancelled
 }
 
+enum ImageType {
+  thumbnail
+  image
+}
+
 model User {
   id        String      @id @default(cuid())
   name      String
@@ -73,11 +78,13 @@ model Product {
   user        User          @relation(fields: [userId], references: [id])
   cartItem    Cart[]
   orderItems  OrderItem[]
+  trackedImages Image[]
 
   @@index([userId])
 }
 
 model ProductDraft {
+  id          String        @id @default(cuid())
   name        String?
   thumbnail   String?
   images      String?
@@ -90,8 +97,9 @@ model ProductDraft {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  userId      String        @id
+  userId      String   @unique
   user        User          @relation(fields: [userId], references: [id])
+  trackedImages      Image[]
 
   @@index([userId])
 }
@@ -101,9 +109,19 @@ model Image {
   url       String
   publicId  String    @unique
   userId    String
+  type      ImageType @default(image)
   createdAt DateTime @default(now())
 
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+
+  draftId   String?
+  draft     ProductDraft? @relation(fields: [draftId], references: [id])
+
   user      User      @relation(fields: [userId], references: [id])
+
+  @@index([productId])
+  @@index([draftId])
 }
 
 model Cart {

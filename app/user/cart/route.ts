@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
         product: {
           select: {
             name: true,
-            thumbnail: true,
             price: true,
             stock: true,
           },
@@ -33,7 +32,6 @@ export async function GET(req: NextRequest) {
         quantity: item.quantity,
         productId: item.productId,
         name: item.product.name,
-        thumbnail: JSON.parse(item.product.thumbnail),
         price: item.product.price,
         stock: item.product.stock,
       };

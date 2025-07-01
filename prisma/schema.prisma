@@ -62,8 +62,6 @@ model User {
 model Product {
   id          String        @id @default(cuid())
   name        String
-  thumbnail   String
-  images      String?
   description String?
   discount    Int           @default(0)
   price       Float
@@ -78,7 +76,7 @@ model Product {
   user        User          @relation(fields: [userId], references: [id])
   cartItem    Cart[]
   orderItems  OrderItem[]
-  trackedImages Image[]
+  images Image[]
 
   @@index([userId])
 }
@@ -86,12 +84,9 @@ model Product {
 model ProductDraft {
   id          String        @id @default(cuid())
   name        String?
-  thumbnail   String?
-  images      String?
   description String?
   discount    Int?
   price       Float?
-  rating      Float?
   stock       Int?
   category    String?
   createdAt   DateTime      @default(now())
@@ -99,7 +94,7 @@ model ProductDraft {
 
   userId      String   @unique
   user        User          @relation(fields: [userId], references: [id])
-  trackedImages      Image[]
+  images      Image[]
 
   @@index([userId])
 }

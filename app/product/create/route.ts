@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validateToken } from "@/utils/tokenValidator";
 import { defaultError } from "@/utils/defaultError";
 import { validateProductWithAI } from "@/utils/ai-validators/product";
+import cuid from "cuid";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,21 +18,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const {
-      name,
-      thumbnail,
-      images,
-      description,
-      discount,
-      price,
-      stock,
-      category,
-    } = await req.json();
+    const { draftId } = await req.json();
+
+    if (!draftId) {
+      return NextResponse.json(
+        { error: "Draft ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const draft = await prisma.productDraft.findUnique({
+      where: { id: draftId, userId: tokenUser.id },
+    });
+
+    if (!draft) {
+      return NextResponse.json(
+        { error: "Draft not found or you do not have permission to access it" },
+        { status: 404 }
+      );
+    }
+
+    const { name, description, discount, price, stock, category } = draft;
 
     const productData = {
       name,
-      thumbnail: JSON.stringify(thumbnail),
-      images: JSON.stringify(images),
       description,
       discount,
       price,
@@ -44,19 +54,40 @@ export async function POST(req: NextRequest) {
 
     await validateProductWithAI(data);
 
-    const product = await prisma.product.create({
-      data: {
-        ...data,
-      },
-    });
+    const productId = cuid();
+
+    const [product] = await prisma.$transaction([
+      prisma.product.create({ data: { id: productId, ...data } }),
+      prisma.image.updateMany({
+        where: {
+          draftId,
+          userId: tokenUser.id,
+        },
+        data: {
+          draftId: null,
+          productId: productId,
+        },
+      }),
+      prisma.productDraft.update({
+        where: {
+          id: draftId,
+          userId: tokenUser.id,
+        },
+        data: {
+          name: null,
+          description: null,
+          discount: null,
+          price: null,
+          stock: null,
+          category: null,
+        },
+      }),
+    ]);
 
     return NextResponse.json(
       {
-        product: {
-          ...product,
-          thumbnail: JSON.parse(product.thumbnail || "{url: null, id: null}"),
-          images: JSON.parse(product.images || "[]"),
-        },
+        message: "Product created successfully",
+        id: product.id,
       },
       { status: 200 }
     );

@@ -49,6 +49,7 @@ model User {
   products  Product[]
   orders   Order[]
   cartItem    Cart[]
+  images    Image[]
 
   productDraft ProductDraft?
 }
@@ -93,6 +94,16 @@ model ProductDraft {
   user        User          @relation(fields: [userId], references: [id])
 
   @@index([userId])
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  publicId  String    @unique
+  userId    String
+  createdAt DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Cart {

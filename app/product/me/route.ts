@@ -86,6 +86,30 @@ export async function PATCH(req: NextRequest) {
 
     await validateProductWithAI(data);
 
+    const newImages = JSON.parse(data.images || "[]");
+    const newThumbnail = JSON.parse(data.thumbnail);
+
+    const oldProduct = await prisma.product.findUnique({
+      where: { id, userId: validToken.id },
+    });
+
+    const imagesToDelete = JSON.parse(oldProduct?.images || "[]")
+      .filter((img: { id: string; url: string }) => {
+        return !newImages.some(
+          (newImg: { id: string; url: string }) => newImg.id === img.id
+        );
+      })
+      .map((img: { id: string; url: string }) => img.id);
+
+    await fetch(process.env.BASE_URL + "/cloudinary/delete-many", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${req.headers.get("token")}`,
+      },
+      body: JSON.stringify(imagesToDelete),
+    });
+
     const tokenUserProduct = await prisma.product.update({
       where: { id, userId: validToken.id },
       data: {

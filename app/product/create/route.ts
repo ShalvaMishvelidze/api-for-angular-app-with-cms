@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
     const data = productSchema.parse(productData);
 
-    validateProductWithAI(data);
+    await validateProductWithAI(data);
 
     const product = await prisma.product.create({
       data: {

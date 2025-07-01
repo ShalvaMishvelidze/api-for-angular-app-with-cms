@@ -84,7 +84,7 @@ export async function PATCH(req: NextRequest) {
 
     const data = productSchema.parse(productData);
 
-    validateProductWithAI(data);
+    await validateProductWithAI(data);
 
     const tokenUserProduct = await prisma.product.update({
       where: { id, userId: validToken.id },
